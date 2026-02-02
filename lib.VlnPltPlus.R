@@ -16,15 +16,18 @@ VlnPlotPlus <- function(
     filter_val = NULL,
     pal.colors = NULL,
     show.summary = FALSE,
-    show.summary.color  = c('#DC0000B2'),
+    show.summary.color  = c('#DC0000AA'),
     show.boxplot = FALSE,
-    show.boxplot.color = c('#DC0000B2'),
+    show.boxplot.color = c('#DC000066'),
     ylab = "value",
     xlab = group_var,
+    small = NULL,
     title = rowname
 ) {
     .df <- tibble::enframe(mat[rowname,]) %>%
         dplyr::left_join(samples.all, by="name")
+
+    if(!is.null(small)) .df %<>% mutate(value = value+small)
 
     if (!is.null(filter_val)) {
         if(is.null(filter_var)) filter_var <- group_var
@@ -58,7 +61,7 @@ VlnPlotPlus <- function(
     }
 
     if(is.logical(show.summary) && show.summary)
-        show.summary <- c("median")
+        show.summary <- c("mean")
     if(is.character(show.summary)) {
         show.summary.color <- rep(show.summary.color, length(show.summary))
         for(i in 1:length(show.summary)) {
@@ -74,7 +77,7 @@ VlnPlotPlus <- function(
     }
 
     if(is.logical(show.boxplot) && show.boxplot)
-        show.boxplot <- c("median_hilow")
+        show.boxplot <- c("mean_cl_boot")
     if(is.character(show.boxplot)) {
         show.boxplot.color <- rep(show.boxplot.color, length(show.boxplot))
         for(i in 1:length(show.boxplot)) {

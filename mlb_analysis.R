@@ -378,12 +378,13 @@ plt.list$all.cat1 <- VlnPlotPlus(
     group_var = "cat1",
     pal.colors = pal.cat[["cat1"]],
     show.boxplot = "mean_cl_boot",
+    show.summary = "mean",
     ylab="CPM", title=the.gname
 )
 
 pdf("ERVFRD-1.all_tissues.pdf", width=11, height=4)
     plt.list$all.cat1 +
-        scale_y_log10(labels = scales::comma) +
+        coord_cartesian(ylim = c(0,3)) +
         VlnPlotPlus.theme() +
         theme(
             axis.text.x = element_text(
@@ -393,7 +394,19 @@ pdf("ERVFRD-1.all_tissues.pdf", width=11, height=4)
                 hjust=1
             )
         )
-    print(legend.only(plt.list$all.cat1))
+dev.off()
+
+pdf("ERVFRD-1.all_tissues.notrim.pdf", width=11, height=4)
+plt.list$all.cat1 +
+    VlnPlotPlus.theme() +
+    theme(
+        axis.text.x = element_text(
+            size = rel(0.8),
+            angle = 50,
+            vjust = 1,
+            hjust=1
+        )
+    )
 dev.off()
 
 ## Plot 2: select tissues, cat1
@@ -423,7 +436,7 @@ plt.list$sel.cat1 <- VlnPlotPlus(
 
 pdf("ERVFRD-1.select_tissues.pdf", width=11, height=5)
     plt.list$sel.cat1 +
-        scale_y_log10(labels = scales::comma) +
+        coord_cartesian(ylim = c(0,3)) +
         VlnPlotPlus.theme() +
         theme(
             axis.text.x = element_text(
@@ -433,8 +446,21 @@ pdf("ERVFRD-1.select_tissues.pdf", width=11, height=5)
                 hjust=1
             )
         )
-    print(legend.only(plt.list$sel.cat1))
 dev.off()
+pdf("ERVFRD-1.select_tissues.notrim.pdf", width=11, height=5)
+plt.list$sel.cat1 +
+    coord_cartesian(ylim = c(0,3)) +
+    VlnPlotPlus.theme() +
+    theme(
+        axis.text.x = element_text(
+            size = rel(0.8),
+            angle = 50,
+            vjust = 1,
+            hjust=1
+        )
+    )
+dev.off()
+
 
 
 
@@ -465,7 +491,7 @@ plt.list$sel.cat2 <- VlnPlotPlus(
 
 pdf("ERVFRD-1.select_detail.pdf", width=11, height=5)
     plt.list$sel.cat2 +
-        scale_y_log10(labels = scales::comma) +
+        coord_cartesian(ylim = c(0,6)) +
         VlnPlotPlus.theme() +
         theme(
             axis.text.x = element_text(
@@ -476,7 +502,22 @@ pdf("ERVFRD-1.select_detail.pdf", width=11, height=5)
             )
         )
 
-    legend.only(plt.list$sel.cat2)
+    # legend.only(plt.list$sel.cat2)
+dev.off()
+
+pdf("ERVFRD-1.select_detail.notrim.pdf", width=11, height=5)
+plt.list$sel.cat2 +
+    VlnPlotPlus.theme() +
+    theme(
+        axis.text.x = element_text(
+            size = rel(0.8),
+            angle = 50,
+            vjust = 1,
+            hjust=1
+        )
+    )
+
+# legend.only(plt.list$sel.cat2)
 dev.off()
 
 
@@ -506,7 +547,7 @@ plt.list$specific <- VlnPlotPlus(
 
 pdf("ERVFRD-1.specific.pdf", width=11, height=5)
     plt.list$specific +
-        scale_y_log10(labels = scales::comma) +
+        coord_cartesian(ylim = c(0,6)) +
         VlnPlotPlus.theme() +
         theme(
             axis.text.x = element_text(
@@ -516,9 +557,23 @@ pdf("ERVFRD-1.specific.pdf", width=11, height=5)
                 hjust=1
             )
         )
-
-    legend.only(plt.list$specific)
+    # legend.only(plt.list$specific)
 dev.off()
+
+pdf("ERVFRD-1.specific.notrim.pdf", width=11, height=5)
+plt.list$specific +
+    VlnPlotPlus.theme() +
+    theme(
+        axis.text.x = element_text(
+            size = rel(0.8),
+            angle = 50,
+            vjust = 1,
+            hjust=1
+        )
+    )
+# legend.only(plt.list$specific)
+dev.off()
+
 
 ## Plot 4
 plt.list$cat3 <- VlnPlotPlus(
@@ -537,9 +592,9 @@ plt.list$cat3 <- VlnPlotPlus(
         show.ns = TRUE
     )
 
-pdf("ERVFRD-1.response.pdf", width=11, height=6, paper="USr")
+pdf("ERVFRD-1.response.pdf", width=7, height=5)
     plt.list$cat3 +
-        scale_y_log10(labels = scales::comma) +
+        coord_cartesian(ylim = c(0,10)) +
         VlnPlotPlus.theme() +
         theme(
             axis.text.x = element_text(
@@ -549,7 +604,21 @@ pdf("ERVFRD-1.response.pdf", width=11, height=6, paper="USr")
                 hjust=1
             )
         )
-    print(legend.only(plt.list$cat3))
+    # legend.only(plt.list$cat3)
+dev.off()
+
+pdf("ERVFRD-1.response.notrim.pdf", width=7, height=5)
+plt.list$cat3 +
+    VlnPlotPlus.theme() +
+    theme(
+        axis.text.x = element_text(
+            size = rel(0.8),
+            angle = 50,
+            vjust = 1,
+            hjust=1
+        )
+    )
+# legend.only(plt.list$cat3)
 dev.off()
 
 
