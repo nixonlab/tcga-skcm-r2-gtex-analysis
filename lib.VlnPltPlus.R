@@ -116,48 +116,65 @@ VlnPlotPlus.theme <- function(...) {
     )
 }
 
-VlnPlotPlus.test <- function(ggplt, padj.th=1e-3, test.comparisons=NULL, show.ns=FALSE, ...) {
+VlnPlotPlus.test <- function(
+        ggplt,
+        padj.th=1e-3,
+        test.comparisons=NULL,
+        show.ns=FALSE,
+        test.label.y = "top",
+        method.multi = "kruskal.test",
+        method.pairwise = "wilcox.test",
+        ...
+) {
     fm <- as.formula(str_c(as_label(ggplt$mapping$y), ' ~ ', as_label(ggplt$mapping$x)))
-    res.kruskal <- ggpubr::compare_means(
+
+    label.y.npc <- case_when(
+        is.numeric(test.label.y) ~ {
+            coord.y <- layer_scales(ggplt)$y$get_limits()
+            test.label.y / coord.y[2]
+        },
+        is.character(test.label.y) ~ test.label.y
+    )
+    res.multi <- ggpubr::compare_means(
         fm,
         data=ggplt$data,
-        method="kruskal.test"
+        method= method.multi
     )
-    if(res.kruskal$p.adj[1] < padj.th){
+    if(res.multi$p.adj[1] < padj.th){
         ggplt <- ggplt + ggpubr::stat_compare_means(
-            method='kruskal.test',
-            label.y.npc='top',
+            method=method.multi,
+            label.y.npc = label.y.npc,
             label.x.npc = 'left',
             size = rel(3)
         )
-        res.wilcox <- ggpubr::compare_means(
+        res.pw <- ggpubr::compare_means(
             fm,
             data=ggplt$data,
-            method = "wilcox.test",
+            method = method.pairwise,
             p.adjust.method = "holm"
         )
         if(is.null(test.comparisons)) {
             if(show.ns) {
                 # get all comps
-                comps <- res.wilcox %>%
+                comps <- res.pw %>%
                     rowwise() %>%
                     mutate(x=list(c(group1,group2))) %>%
                     pull(x)
             } else {
                 # get all < padj.th
-                comps <- res.wilcox %>%
+                comps <- res.pw %>%
                     filter(p.adj < padj.th) %>%
                     rowwise() %>%
                     mutate(x=list(c(group1,group2))) %>%
                     pull(x)
             }
         } else {
-            sel.wilcox <- lapply(test.comparisons, function(v) {
+            sel.pw <- lapply(test.comparisons, function(v) {
                 if(length(v)==2) {
-                    res.wilcox %>%
+                    res.pw %>%
                         filter((group1==v[1] & group2==v[2]) | (group1==v[2] & group2==v[1]))
                 } else if (length(v)==1) {
-                    res.wilcox %>%
+                    res.pw %>%
                         filter((group1==v[1]) | (group2==v[1]))
                 }
             }) %>%
@@ -165,13 +182,13 @@ VlnPlotPlus.test <- function(ggplt, padj.th=1e-3, test.comparisons=NULL, show.ns
                 distinct()
             if(show.ns) {
                 # get all comps
-                comps <- sel.wilcox %>%
+                comps <- sel.pw %>%
                     rowwise() %>%
                     mutate(x=list(c(group1,group2))) %>%
                     pull(x)
             } else {
                 # get all < padj.th
-                comps <- sel.wilcox %>%
+                comps <- sel.pw %>%
                     filter(p.adj < padj.th) %>%
                     rowwise() %>%
                     mutate(x=list(c(group1,group2))) %>%
@@ -181,9 +198,9 @@ VlnPlotPlus.test <- function(ggplt, padj.th=1e-3, test.comparisons=NULL, show.ns
         if(length(comps)>0) {
             ggplt <- ggplt + ggpubr::stat_compare_means(
                 comparisons = comps,
-                label.y.npc='middle',
-                label.x.npc='middle',
-                # tip.length = 0.03, # height that bar goes down
+                method = method.pairwise,
+                p.adjust.method = "holm",
+                tip.length = rel(0.02), # height that bar goes down
                 bracket.size = 0.2, # width of bracket lines
                 step.increase = rel(0.2),
                 size=rel(2)

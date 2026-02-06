@@ -18,7 +18,7 @@ calcCPM <- function(df) {
 
 
 # gtex sample meta
-if(!file.exists('meta.gtex.rds')) {
+if(!file.exists('data/meta.gtex.rds')) {
     saveRDS(
         (
             meta.gtex <- read.delim(
@@ -27,10 +27,10 @@ if(!file.exists('meta.gtex.rds')) {
                 header=TRUE
             )
         ),
-        file="meta.gtex.rds"
+        file="data/meta.gtex.rds"
     )
 } else {
-    meta.gtex <- readRDS('meta.gtex.rds')
+    meta.gtex <- readRDS('data/meta.gtex.rds')
 }
 
 # gtex counts
@@ -274,6 +274,25 @@ samples.all <- rbind(samples.cm, samples.gtex) %>%
         cat2=factor(cat2,levels=cat.all$cat2)
     )
 
+samples.all %<>%
+    mutate(
+        cat4 = case_when(
+            cat1=="Primary Tumor" ~ "CM.Primary",
+            cat1=="Metastatic" ~ "CM.Metastatic",
+            cat1=="Skin" ~ case_match(
+                cat2,
+              "Cells - Transformed fibroblasts" ~ NA,
+              "Skin - Not Sun Exposed (Suprapubic)" ~ "Skin.not_exposed",
+              "Skin - Sun Exposed (Lower leg)" ~ "Skin.exposed",
+            )
+        )
+    ) %>%
+    mutate(cat4 = factor(
+        cat4,
+        levels=c("CM.Primary","CM.Metastatic","Skin.exposed", "Skin.not_exposed")
+    ))
+
+samples.all %>% count(cat4)
 
 # d1 <- setdiff(rownames(cpm.cm), rownames(cpm.gtex))
 # d2 <- setdiff(rownames(cpm.gtex), rownames(cpm.cm))
@@ -449,7 +468,6 @@ pdf("ERVFRD-1.select_tissues.pdf", width=11, height=5)
 dev.off()
 pdf("ERVFRD-1.select_tissues.notrim.pdf", width=11, height=5)
 plt.list$sel.cat1 +
-    coord_cartesian(ylim = c(0,3)) +
     VlnPlotPlus.theme() +
     theme(
         axis.text.x = element_text(
@@ -621,5 +639,34 @@ plt.list$cat3 +
 # legend.only(plt.list$cat3)
 dev.off()
 
+## Plot 6: pub
+source('lib.VlnPltPlus.R')
+pal.cat$cat4 <- c(
+    `CM.Primary`= unname(pal.cat$cat1['Primary Tumor']),
+    `CM.Metastatic`=unname(pal.cat$cat1['Metastatic']),
+    `Skin.exposed`=unname(pal.cat$cat2["Skin - Sun Exposed (Lower leg)"]),
+    `Skin.not_exposed`=unname(pal.cat$cat2["Skin - Not Sun Exposed (Suprapubic)"])
+)
+plt.list$pubfig <- VlnPlotPlus(
+    cpm.both,
+    the.gid,
+    col.meta = samples.all,
+    group_var = "cat4",
+    filter_var = "cat4",
+    filter_val = c("CM.Primary", "CM.Metastatic", "Skin.exposed","Skin.not_exposed"),
+    pal.colors=pal.cat$cat4,
+    show.summary = "mean",
+    show.boxplot = "mean_cl_boot",
+    ylab="CPM", title=the.gname
+) %>%
+    VlnPlotPlus.test(
+        test.label.y = 10,
+        padj.th = padj.th,
+        show.ns = FALSE
+    )
 
+pdf("ERVFRD-1.pubfig.pdf", width=7, height=2.5)
+    plt.list$pubfig + VlnPlotPlus.theme()
+    plt.list$pubfig + coord_cartesian(ylim = c(0,5)) + VlnPlotPlus.theme()
+dev.off()
 
